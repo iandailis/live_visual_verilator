@@ -2,7 +2,8 @@ VERILATOR := verilator
 VERILATOR_OUTPUT_DIR := verilator_output
 VERILATOR_CONFIG_FILE :=
 # VERILATOR_CONFIG_FILE := verilator_config.vlt
-VERILATOR_MISC_ARGS := -sv -O3 --x-assign fast --x-initial fast --noassert --clk clk -LDFLAGS "-O3 -I/usr/include/SDL2 -D_REENTRANT -lSDL2"
+SDL2_FLAGS := $(shell sdl2-config --cflags --libs)
+VERILATOR_MISC_ARGS := -O3 --x-assign fast --x-initial fast --noassert -CFLAGS "-Ofast" -LDFLAGS "$(SDL2_FLAGS)"
 VERILATOR_DUMP_ARG :=
 # VERILATOR_DUMP_ARG := --trace-fst --trace-structs --trace-threads 2 --no-trace-top
 VERILATOR_WHITELIST := -Wall
@@ -37,7 +38,7 @@ compile_sim: Makefile
 	mkdir -p $(WORK_DIR)
 	mkdir -p $(WORK_DIR)/$(VERILATOR_OUTPUT_DIR)
 	cp $(TB_H) $(WORK_DIR)/$(VERILATOR_OUTPUT_DIR)
-	$(VERILATOR) -Mdir $(WORK_DIR)/$(VERILATOR_OUTPUT_DIR) -top $(TOP_TB) $(VERILATOR_FLAGS) $(SRCS)
+	$(VERILATOR) -Mdir $(WORK_DIR)/$(VERILATOR_OUTPUT_DIR) -top $(TOP_TB) --clk clk $(VERILATOR_FLAGS) $(SRCS)
 
 .PHONY: clean
 clean:
