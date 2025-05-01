@@ -5,6 +5,8 @@ module top_tb (
     output logic [9:0] draw_x,
     output logic [9:0] draw_y,
 
+    input logic evt,
+
     output logic [3:0] VGA_R,
     output logic [3:0] VGA_G,
     output logic [3:0] VGA_B,
@@ -22,6 +24,8 @@ module top_tb (
     top_rtl dut (
         .clk(clk),
         .rst(rst),
+
+        .evt(evt),
 
         .VGA_R(VGA_R),
         .VGA_G(VGA_G),

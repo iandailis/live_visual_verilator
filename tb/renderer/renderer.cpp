@@ -23,11 +23,12 @@ volatile static int draw_done;
 volatile static int poll_done;
 
 static screen_t screen;
+volatile static int* quit_sim;
+volatile static int* evt_array;
 
 int init() {	// start SDL and create a window, returns 0 on error
 	quit_flag = 0;
 	draw_flag = 0;
-	screen = (screen_t)malloc(sizeof(int)*VERTICAL_RESOLUTION*HORIZONTAL_RESOLUTION*3);
 
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {		// video init
         std::cout << "meepmop: " << SDL_GetError() << std::endl;
@@ -61,6 +62,7 @@ int poll_thread(void* arg) {
 	while (!quit_flag) {
 		if (SDL_PollEvent(&e)) {	// poll for events
 			if (eventHandler(e)) {
+				poll_done = 1;
 				close_screen();
 				return 0;
 			};
@@ -71,52 +73,29 @@ int poll_thread(void* arg) {
 }
 
 int eventHandler(SDL_Event e) {	// handle events
-	if (e.type == SDL_QUIT) {	// quit event
-		return 1;
-	} else if(e.type == SDL_KEYDOWN) {	// keydown event
-		switch(e.key.keysym.sym) {
-			case SDLK_UP:				// up
-				break;
-			case SDLK_DOWN:				// down
-				break;
-			case SDLK_LEFT:				// left
-				break;
-			case SDLK_RIGHT:			// right
-				break;
-			case SDLK_BACKSPACE:		// backspace
-			case SDLK_0:				// 0
-				break;
-			case SDLK_2:				// 1
-				break;
-			case SDLK_1:				// 2
-				break;
-			case SDLK_3:				// 3
-				break;
-			case SDLK_4:				// 4
-				break;
-			case SDLK_5:				// 5
-				break;
-			case SDLK_6:				// 6
-				break;
-			case SDLK_7:				// 7
-				break;
-			case SDLK_8:				// 8
-				break;
-			case SDLK_9:				// 9
-				break;
-			case SDLK_RETURN:			// enter
-				break;
-			case SDLK_BACKSLASH:		// backslash
-				break;
-			default:
-				return 0;
-		}
+	switch (e.type) {
+		case SDL_QUIT:
+			std::cout << "quit" << std::endl;
+			return 1;
+		case SDL_KEYDOWN:
+			std::cout << "keydown: " << (char)e.key.keysym.sym << " " << e.key.keysym.sym << std::endl;
+			evt_array[0] = 1;
+			break;
+		case SDL_KEYUP:
+			std::cout << "keyup: " << (char)e.key.keysym.sym << " " << e.key.keysym.sym << std::endl;
+			evt_array[0] = 0;
+			break;
+		default:
+			break;
 	}
 	return 0;
 }
 
-screen_t start_screen() {
+screen_t start_screen(screen_t screen_ptr, volatile int* quit_sim_ptr, volatile int* evt_array_ptr) {
     if (!init()) return NULL;	// initialize the video, window, and renderer
+	screen = screen_ptr;
+	quit_sim = quit_sim_ptr;
+	evt_array = evt_array_ptr;
     return screen;
 }
 
@@ -152,6 +131,7 @@ void draw() {
 
 void close_screen() {		// deallocate memory and close the window
 	quit_flag = 1;
+	*quit_sim = 1;
 	while (!poll_done) {}
 	while (!draw_done) {}
 	SDL_DestroyRenderer(renderer);	// free renderer

@@ -2,6 +2,8 @@ module top_rtl (
     input logic clk,
     input logic rst,
 
+    input logic evt,
+
     output logic [3:0] VGA_R,
     output logic [3:0] VGA_G,
     output logic [3:0] VGA_B,
@@ -44,7 +46,7 @@ ian_dff #(
     .q_o(frame_count_q)
 );
 
-assign VGA_R = (blank) ? '0 : draw_x[4:1];
+assign VGA_R = (blank) ? '0 : (evt) ? '1 : draw_x[4:1];
 assign VGA_G = (blank) ? '0 : draw_y[4:1];
 assign VGA_B = (blank) ? '0 : 4'(frame_count_q + draw_x + draw_y);
 
